@@ -1,0 +1,134 @@
+/* 2ndMBstudy — Design Tokens (Light & Dark Mode) */
+/* Designed by Davidesign */
+
+:root {
+  /* Typography */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* Spacing & Layout */
+  --space-1: 0.25rem;     /* 4px */
+  --space-2: 0.5rem;      /* 8px */
+  --space-3: 0.75rem;     /* 12px */
+  --space-4: 1rem;        /* 16px */
+  --space-5: 1.25rem;     /* 20px */
+  --space-6: 1.5rem;      /* 24px */
+  --space-8: 2rem;        /* 32px */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 9999px;
+
+  --sidebar-width: 248px;
+  --header-height: 60px;
+  --bottom-nav-height: 64px;
+
+  /* Transitions */
+  --transition-fast: 140ms ease;
+  --transition-base: 200ms ease;
+
+  /* Light Mode Palette */
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f1f5f9;
+  --bg-surface-hover: #e2e8f0;
+  --bg-sticky: rgba(248, 250, 252, 0.94);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --accent-primary: #0f766e;       /* Medical teal */
+  --accent-primary-hover: #115e59;
+  --accent-primary-soft: rgba(15, 118, 110, 0.12);
+
+  --accent-secondary: #2563eb;     /* Crisp blue */
+  --accent-secondary-soft: rgba(37, 99, 235, 0.12);
+
+  /* Topic Status Colors */
+  --status-not-started-bg: #f1f5f9;
+  --status-not-started-text: #475569;
+  --status-in-progress-bg: #fef3c7;
+  --status-in-progress-text: #92400e;
+  --status-completed-bg: #dcfce7;
+  --status-completed-text: #166534;
+
+  /* Subject Tag Colors */
+  --subject-anatomy: #0f766e;
+  --subject-biochem: #7c3aed;
+  --subject-physio: #2563eb;
+
+  /* Semantic Feedback */
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --warning-bg: #fef3c7;
+  --warning-text: #92400e;
+  --danger-bg: #fee2e2;
+  --danger-text: #991b1b;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="dark"] {
+  --bg-canvas: #0d0f12;
+  --bg-surface: #15181e;
+  --bg-surface-subtle: #1c2028;
+  --bg-surface-hover: #252a34;
+  --bg-sticky: rgba(13, 15, 18, 0.94);
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0d0f12;
+
+  --border-subtle: #242933;
+  --border-strong: #333b4a;
+
+  --accent-primary: #14b8a6;
+  --accent-primary-hover: #2dd4bf;
+  --accent-primary-soft: rgba(20, 184, 166, 0.16);
+
+  --accent-secondary: #60a5fa;
+  --accent-secondary-soft: rgba(96, 165, 250, 0.16);
+
+  --status-not-started-bg: #1e2430;
+  --status-not-started-text: #cbd5e1;
+  --status-in-progress-bg: rgba(245, 158, 11, 0.18);
+  --status-in-progress-text: #fcd34d;
+  --status-completed-bg: rgba(34, 197, 94, 0.18);
+  --status-completed-text: #86efac;
+
+  --subject-anatomy: #2dd4bf;
+  --subject-biochem: #a78bfa;
+  --subject-physio: #60a5fa;
+
+  --success-bg: rgba(34, 197, 94, 0.18);
+  --success-text: #86efac;
+  --warning-bg: rgba(245, 158, 11, 0.18);
+  --warning-text: #fcd34d;
+  --danger-bg: rgba(239, 68, 68, 0.18);
+  --danger-text: #fca5a5;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 14px 32px rgba(0, 0, 0, 0.6);
+}
