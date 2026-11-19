@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="2ndMBstudy — your 2nd mb study website. Organise Second MBBS Anatomy, Biochemistry, and Physiology, track progress toward March 1, 2027, and study smarter with AI." />
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="2ndMBstudy" />
+
+  <title>2ndMBstudy — your 2nd mb study website</title>
+
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <script type="module" src="/js/main.js"></script>
+</head>
+<body>
+  <noscript>
+    <div style="padding: 24px; font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto;">
+      <h1>2ndMBstudy</h1>
+      <p>your 2nd mb study website</p>
+      <p>JavaScript is required to run this study tracker and AI workspace. Please enable JavaScript in your browser settings.</p>
+    </div>
+  </noscript>
+
+  <div id="app-shell" class="app-shell">
+    <!-- Desktop Sidebar Navigation -->
+    <aside id="desktop-sidebar" class="desktop-sidebar" aria-label="Primary Navigation">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">2M</div>
+        <div class="brand-text">
+          <span class="brand-name">2ndMBstudy</span>
+          <span class="brand-subtitle">your 2nd mb study website</span>
+        </div>
+      </div>
+
+      <nav class="side-nav" aria-label="Main sections">
+        <button type="button" class="nav-item is-active" data-nav="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="curriculum">
+          <i data-lucide="book-open"></i>
+          <span>Curriculum</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="tasks">
+          <i data-lucide="check-square"></i>
+          <span>Tasks &amp; Timer</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="analytics">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Analytics</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="ai-coach">
+          <i data-lucide="sparkles"></i>
+          <span>AI Coach</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="materials">
+          <i data-lucide="layers"></i>
+          <span>Study Materials</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div id="sidebar-plan-badge" class="plan-pill">Free Plan</div>
+        <button type="button" id="sidebar-upgrade-btn" class="btn btn-primary btn-sm">
+          Upgrade · ₦1,000 Once
+        </button>
+        <p class="credit-note">Designed by Davidesign</p>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="main-column">
+      <!-- Top Header Bar -->
+      <header id="top-header" class="top-header">
+        <div class="header-left">
+          <div class="mobile-brand">
+            <div class="brand-mark brand-mark--sm" aria-hidden="true">2M</div>
+            <div class="brand-text">
+              <span class="brand-name">2ndMBstudy</span>
+              <span class="brand-subtitle">your 2nd mb study website</span>
+            </div>
+          </div>
+          <div id="header-context-title" class="header-context-title">Dashboard</div>
+        </div>
+
+        <div class="header-right">
+          <div id="header-countdown" class="countdown-chip" title="Target 2nd MB Examination Date">
+            <i data-lucide="clock"></i>
+            <span id="header-countdown-text">Loading countdown…</span>
+          </div>
+
+          <button type="button" id="install-app-btn" class="icon-btn hidden" title="Add to Home Screen" aria-label="Add to Home Screen">
+            <i data-lucide="download"></i>
+            <span class="hide-on-xs">Install</span>
+          </button>
+
+          <button type="button" id="theme-toggle-btn" class="icon-btn" title="Switch Light / Dark Mode" aria-label="Switch Light or Dark Mode">
+            <i data-lucide="moon"></i>
+          </button>
+
+          <button type="button" id="header-premium-btn" class="btn btn-primary btn-xs">
+            ₦1,000 Premium
+          </button>
+        </div>
+      </header>
+
+      <!-- Global Banner / Toast Area -->
+      <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+      <!-- Primary Dynamic View Container -->
+      <main id="main-view" class="main-view" tabindex="-1">
+        <div class="state-card state-loading">
+          <p class="state-title">Loading 2ndMBstudy…</p>
+          <p class="state-desc">Preparing your 2nd MB curriculum, study tracker, and local workspace.</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <button type="button" class="bottom-nav-item is-active" data-nav="dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Home</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-nav="curriculum">
+        <i data-lucide="book-open"></i>
+        <span>Syllabus</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-nav="tasks">
+        <i data-lucide="timer"></i>
+        <span>Study</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-nav="ai-coach">
+        <i data-lucide="sparkles"></i>
+        <span>AI Coach</span>
+      </button>
+      <button type="button" id="mobile-more-btn" class="bottom-nav-item" data-nav="more">
+        <i data-lucide="menu"></i>
+        <span>More</span>
+      </button>
+    </nav>
+
+    <!-- Modal / Drawer Root -->
+    <div id="modal-root" class="modal-root hidden" aria-hidden="true"></div>
+  </div>
+</body>
+  </html>
+  
