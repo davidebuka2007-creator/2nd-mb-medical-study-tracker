@@ -1,0 +1,26 @@
+{
+  "name": "2ndMBstudy — your 2nd mb study website",
+  "short_name": "2ndMBstudy",
+  "description": "Comprehensive Second MBBS study tracker and AI revision platform for Anatomy, Biochemistry, and Physiology. Designed by Davidesign.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e0f12",
+  "theme_color": "#0f766e",
+  "categories": ["education", "medical", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
