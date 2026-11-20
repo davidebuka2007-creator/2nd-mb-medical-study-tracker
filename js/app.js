@@ -33,14 +33,30 @@ const VIEW_TITLES = Object.freeze({
   materials: 'Study Materials'
 });
 
+const VIEW_RENDERERS = Object.freeze({
+  dashboard: renderDashboardView,
+  syllabus: renderSyllabusView,
+  timer: renderTimerView,
+  planner: renderPlannerView,
+  analytics: renderAnalyticsView,
+  'ai-coach': renderAiCoachView,
+  materials: renderMaterialsView
+});
+
 let activeView = 'dashboard';
 let activeCleanup = null;
 
-function applyPreferencesToDom(prefs) {
+function escapeHtml(value) {
+  const div = document.createElement('div');
+  div.textContent = String(value ?? '');
+  return div.innerHTML;
+}
+
+function applyPreferencesToDom(prefs = {}) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
   root.setAttribute('data-theme', prefs.theme === 'dark' ? 'dark' : 'light');
-  root.setAttribute('data-font-scale', prefs.fontScale || 'md');
+  root.setAttribute('data-font-scale', ['sm', 'md', 'lg'].includes(prefs.fontScale) ? prefs.fontScale : 'md');
   root.setAttribute(
     'data-accent',
     ['teal', 'indigo', 'emerald'].includes(prefs.accent) ? prefs.accent : 'teal'
@@ -49,7 +65,8 @@ function applyPreferencesToDom(prefs) {
 
 function syncHeaderAndNavState() {
   const snap = getSnapshot();
-  const { prefs, uiCache } = snap;
+  const prefs = snap?.prefs || {};
+  const uiCache = snap?.uiCache || {};
   applyPreferencesToDom(prefs);
 
   document.querySelectorAll('[data-nav-view]').forEach((btn) => {
@@ -83,9 +100,10 @@ function syncHeaderAndNavState() {
   const fontBtn = document.getElementById('font-scale-btn');
   if (fontBtn) {
     const order = ['sm', 'md', 'lg'];
-    const idx = order.indexOf(prefs.fontScale || 'md');
+    const currentScale = ['sm', 'md', 'lg'].includes(prefs.fontScale) ? prefs.fontScale : 'md';
+    const idx = order.indexOf(currentScale);
     const nextScale = order[(idx + 1) % order.length];
-    fontBtn.textContent = `A/a (${(prefs.fontScale || 'md').toUpperCase()})`;
+    fontBtn.textContent = `A/a (${currentScale.toUpperCase()})`;
     fontBtn.setAttribute('title', `Cycle text size to ${nextScale.toUpperCase()}`);
   }
 }
@@ -125,7 +143,7 @@ export function navigateToView(viewName, context = null, { updateHash = true } =
   if (snap.loading && !snap.initialized) {
     viewHost.innerHTML = `
       <div class="state-card">
-        <p class="state-title">Loading ${APP_CONFIG.brandName}...</p>
+        <p class="state-title">Loading ${escapeHtml(APP_CONFIG?.brandName || '2ndMBstudy')}...</p>
         <p class="state-desc">Preparing your local 2nd MB syllabus progress and study workspace.</p>
       </div>
     `;
@@ -136,8 +154,8 @@ export function navigateToView(viewName, context = null, { updateHash = true } =
     viewHost.innerHTML = `
       <div class="state-card state-error">
         <p class="state-title">Storage Initialization Issue</p>
-        <p class="state-desc">${String(snap.error)}</p>
-        <button type="button" id="retry-init-btn" class="btn btn-primary btn-sm">Retry</button>
+        <p class="state-desc">${escapeHtml(snap.error)}</p>
+        <button type="button" id="retry-init-btn" class="btn btn-primary btn-sm" style="margin-top: 12px;">Retry</button>
       </div>
     `;
     document.getElementById('retry-init-btn')?.addEventListener('click', () => {
@@ -151,23 +169,19 @@ export function navigateToView(viewName, context = null, { updateHash = true } =
     initialContext: context
   };
 
-  if (nextView === 'dashboard') {
-    activeCleanup = renderDashboardView(viewHost, navCallbacks) || null;
-  } else if (nextView === 'syllabus') {
-    activeCleanup = renderSyllabusView(viewHost, navCallbacks) || null;
-  } else if (nextView === 'timer') {
-    activeCleanup = renderTimerView(viewHost, navCallbacks) || null;
-  } else if (nextView === 'planner') {
-    activeCleanup = renderPlannerView(viewHost, navCallbacks) || null;
-  } else if (nextView === 'analytics') {
-    activeCleanup = renderAnalyticsView(viewHost, navCallbacks) || null;
-  } else if (nextView === 'ai-coach') {
-    activeCleanup = renderAiCoachView(viewHost, navCallbacks) || null;
-  } else if (nextView === 'materials') {
-    activeCleanup = renderMaterialsView(viewHost, navCallbacks) || null;
+  try {
+    const renderer = VIEW_RENDERERS[nextView] || VIEW_RENDERERS.dashboard;
+    activeCleanup = renderer(viewHost, navCallbacks) || null;
+  } catch (err) {
+    viewHost.innerHTML = `
+      <div class="state-card state-error">
+        <p class="state-title">Unable to Display ${escapeHtml(VIEW_TITLES[nextView] || 'View')}</p>
+        <p class="state-desc">${escapeHtml(err?.message || 'An unexpected rendering error occurred.')}</p>
+      </div>
+    `;
   }
 
-  document.title = `${VIEW_TITLES[nextView] || 'Dashboard'} · ${APP_CONFIG.brandName}`;
+  document.title = `${VIEW_TITLES[nextView] || 'Dashboard'} · ${APP_CONFIG?.brandName || '2ndMBstudy'}`;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -191,7 +205,7 @@ function bindShellControls() {
   });
 
   document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
-    const current = getSnapshot().prefs.theme;
+    const current = getSnapshot()?.prefs?.theme;
     const nextTheme = current === 'dark' ? 'light' : 'dark';
     updatePreferences({ theme: nextTheme });
     syncHeaderAndNavState();
@@ -200,7 +214,7 @@ function bindShellControls() {
 
   document.getElementById('font-scale-btn')?.addEventListener('click', () => {
     const order = ['sm', 'md', 'lg'];
-    const current = getSnapshot().prefs.fontScale || 'md';
+    const current = getSnapshot()?.prefs?.fontScale || 'md';
     const nextScale = order[(order.indexOf(current) + 1) % order.length];
     updatePreferences({ fontScale: nextScale });
     syncHeaderAndNavState();
@@ -216,18 +230,30 @@ function bindShellControls() {
 }
 
 async function boot() {
-  const initialHashView = parseViewFromHash();
-  if (initialHashView) {
-    activeView = initialHashView;
+  try {
+    const initialHashView = parseViewFromHash();
+    if (initialHashView) {
+      activeView = initialHashView;
+    }
+
+    syncHeaderAndNavState();
+    bindShellControls();
+    navigateToView(activeView, null, { updateHash: false });
+
+    await initStore();
+    syncHeaderAndNavState();
+    navigateToView(activeView, null, { updateHash: false });
+  } catch (err) {
+    const viewHost = document.getElementById('view-container');
+    if (viewHost) {
+      viewHost.innerHTML = `
+        <div class="state-card state-error">
+          <p class="state-title">Startup Error</p>
+          <p class="state-desc">${escapeHtml(err?.message || 'Failed to start 2ndMBstudy.')}</p>
+        </div>
+      `;
+    }
   }
-
-  syncHeaderAndNavState();
-  bindShellControls();
-  navigateToView(activeView, null, { updateHash: false });
-
-  await initStore();
-  syncHeaderAndNavState();
-  navigateToView(activeView, null, { updateHash: false });
 }
 
 if (document.readyState === 'loading') {
