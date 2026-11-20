@@ -12,6 +12,13 @@ export const APP_CONFIG = Object.freeze({
   defaultExamDate: '2027-03-01',
   defaultExamTitle: '2nd MBBS Professional Examination',
 
+  // Default UI appearance preferences
+  defaults: Object.freeze({
+    theme: 'light',
+    fontScale: 'md',
+    accent: 'teal'
+  }),
+
   // Storage isolation (strictly separated from 3rd MB; never use Supabase)
   localStoragePrefix: 'second_mb_study_v1_',
   dbName: 'SecondMBStudyDB_v1',
