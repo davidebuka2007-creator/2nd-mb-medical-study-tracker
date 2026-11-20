@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-font-scale="md" data-accent="teal">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -18,7 +18,7 @@
 
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
-  <script type="module" src="/js/main.js"></script>
+  <script type="module" src="/js/app.js"></script>
 </head>
 <body>
   <noscript>
@@ -30,7 +30,7 @@
   </noscript>
 
   <div id="app-shell" class="app-shell">
-    <!-- Desktop Sidebar Navigation -->
+    <!-- Left Sidebar Navigation (Desktop-style Layout) -->
     <aside id="desktop-sidebar" class="desktop-sidebar" aria-label="Primary Navigation">
       <div class="brand-lockup">
         <div class="brand-mark" aria-hidden="true">2M</div>
@@ -41,38 +41,38 @@
       </div>
 
       <nav class="side-nav" aria-label="Main sections">
-        <button type="button" class="nav-item is-active" data-nav="dashboard">
+        <button type="button" class="nav-item is-active" data-nav-view="dashboard">
           <i data-lucide="layout-dashboard"></i>
           <span>Dashboard</span>
         </button>
-        <button type="button" class="nav-item" data-nav="curriculum">
+        <button type="button" class="nav-item" data-nav-view="syllabus">
           <i data-lucide="book-open"></i>
-          <span>Curriculum</span>
+          <span>2nd MB Syllabus</span>
         </button>
-        <button type="button" class="nav-item" data-nav="tasks">
+        <button type="button" class="nav-item" data-nav-view="timer">
           <i data-lucide="check-square"></i>
-          <span>Tasks &amp; Timer</span>
+          <span>Study Timer</span>
         </button>
-        <button type="button" class="nav-item" data-nav="analytics">
+        <button type="button" class="nav-item" data-nav-view="planner">
+          <i data-lucide="calendar"></i>
+          <span>Planner &amp; Timetable</span>
+        </button>
+        <button type="button" class="nav-item" data-nav-view="analytics">
           <i data-lucide="bar-chart-3"></i>
-          <span>Analytics</span>
+          <span>Analytics &amp; Backup</span>
         </button>
-        <button type="button" class="nav-item" data-nav="ai-coach">
+        <button type="button" class="nav-item" data-nav-view="ai-coach">
           <i data-lucide="sparkles"></i>
           <span>AI Coach</span>
         </button>
-        <button type="button" class="nav-item" data-nav="materials">
+        <button type="button" class="nav-item" data-nav-view="materials">
           <i data-lucide="layers"></i>
           <span>Study Materials</span>
-        </button>
-        <button type="button" class="nav-item" data-nav="settings">
-          <i data-lucide="settings"></i>
-          <span>Settings</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
-        <div id="sidebar-plan-badge" class="plan-pill">Free Plan</div>
+        <div id="sidebar-plan-badge" class="plan-pill">Free · ₦1,000 Once</div>
         <button type="button" id="sidebar-upgrade-btn" class="btn btn-primary btn-sm">
           Upgrade · ₦1,000 Once
         </button>
@@ -98,8 +98,12 @@
         <div class="header-right">
           <div id="header-countdown" class="countdown-chip" title="Target 2nd MB Examination Date">
             <i data-lucide="clock"></i>
-            <span id="header-countdown-text">Loading countdown…</span>
+            <span id="header-countdown-text">March 1, 2027</span>
           </div>
+
+          <button type="button" id="font-scale-btn" class="icon-btn" title="Cycle text size">
+            A/a (MD)
+          </button>
 
           <button type="button" id="install-app-btn" class="icon-btn hidden" title="Add to Home Screen" aria-label="Add to Home Screen">
             <i data-lucide="download"></i>
@@ -110,7 +114,7 @@
             <i data-lucide="moon"></i>
           </button>
 
-          <button type="button" id="header-premium-btn" class="btn btn-primary btn-xs">
+          <button type="button" id="header-upgrade-btn" class="btn btn-primary btn-xs">
             ₦1,000 Premium
           </button>
         </div>
@@ -120,7 +124,7 @@
       <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
       <!-- Primary Dynamic View Container -->
-      <main id="main-view" class="main-view" tabindex="-1">
+      <main id="view-container" class="main-view" tabindex="-1">
         <div class="state-card state-loading">
           <p class="state-title">Loading 2ndMBstudy…</p>
           <p class="state-desc">Preparing your 2nd MB curriculum, study tracker, and local workspace.</p>
@@ -130,25 +134,25 @@
 
     <!-- Mobile Bottom Navigation Bar -->
     <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="Mobile Navigation">
-      <button type="button" class="bottom-nav-item is-active" data-nav="dashboard">
+      <button type="button" class="bottom-nav-item is-active" data-nav-view="dashboard">
         <i data-lucide="layout-dashboard"></i>
         <span>Home</span>
       </button>
-      <button type="button" class="bottom-nav-item" data-nav="curriculum">
+      <button type="button" class="bottom-nav-item" data-nav-view="syllabus">
         <i data-lucide="book-open"></i>
         <span>Syllabus</span>
       </button>
-      <button type="button" class="bottom-nav-item" data-nav="tasks">
+      <button type="button" class="bottom-nav-item" data-nav-view="timer">
         <i data-lucide="timer"></i>
-        <span>Study</span>
+        <span>Timer</span>
       </button>
-      <button type="button" class="bottom-nav-item" data-nav="ai-coach">
+      <button type="button" class="bottom-nav-item" data-nav-view="ai-coach">
         <i data-lucide="sparkles"></i>
         <span>AI Coach</span>
       </button>
-      <button type="button" id="mobile-more-btn" class="bottom-nav-item" data-nav="more">
-        <i data-lucide="menu"></i>
-        <span>More</span>
+      <button type="button" id="mobile-more-btn" class="bottom-nav-item" data-nav-view="materials">
+        <i data-lucide="layers"></i>
+        <span>Materials</span>
       </button>
     </nav>
 
@@ -156,5 +160,4 @@
     <div id="modal-root" class="modal-root hidden" aria-hidden="true"></div>
   </div>
 </body>
-  </html>
-  
+</html>
