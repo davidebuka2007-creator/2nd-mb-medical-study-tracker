@@ -16,8 +16,6 @@
   <link rel="stylesheet" href="/css/base.css" />
   <link rel="stylesheet" href="/css/app.css" />
 
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
   <script type="module" src="/js/app.js"></script>
 </head>
 <body>
@@ -42,38 +40,34 @@
 
       <nav class="side-nav" aria-label="Main sections">
         <button type="button" class="nav-item is-active" data-nav-view="dashboard">
-          <i data-lucide="layout-dashboard"></i>
           <span>Dashboard</span>
         </button>
         <button type="button" class="nav-item" data-nav-view="syllabus">
-          <i data-lucide="book-open"></i>
           <span>2nd MB Syllabus</span>
         </button>
         <button type="button" class="nav-item" data-nav-view="timer">
-          <i data-lucide="check-square"></i>
           <span>Study Timer</span>
         </button>
         <button type="button" class="nav-item" data-nav-view="planner">
-          <i data-lucide="calendar"></i>
           <span>Planner &amp; Timetable</span>
         </button>
         <button type="button" class="nav-item" data-nav-view="analytics">
-          <i data-lucide="bar-chart-3"></i>
           <span>Analytics &amp; Backup</span>
         </button>
         <button type="button" class="nav-item" data-nav-view="ai-coach">
-          <i data-lucide="sparkles"></i>
           <span>AI Coach</span>
         </button>
         <button type="button" class="nav-item" data-nav-view="materials">
-          <i data-lucide="layers"></i>
           <span>Study Materials</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
-        <div id="sidebar-plan-badge" class="plan-pill">Free · ₦1,000 Once</div>
-        <button type="button" id="sidebar-upgrade-btn" class="btn btn-primary btn-sm">
+        <div id="header-countdown" class="countdown-chip" title="Target 2nd MB Examination Date">
+          <span id="header-countdown-text">Target: March 1, 2027</span>
+        </div>
+        <div id="header-plan-badge" class="plan-pill">Free · ₦1,000 Once</div>
+        <button type="button" id="header-upgrade-btn" class="btn btn-primary btn-sm">
           Upgrade · ₦1,000 Once
         </button>
         <p class="credit-note">Designed by Davidesign</p>
@@ -82,7 +76,6 @@
 
     <!-- Main Workspace Column -->
     <div class="main-column">
-      <!-- Top Header Bar -->
       <header id="top-header" class="top-header">
         <div class="header-left">
           <div class="mobile-brand">
@@ -96,31 +89,16 @@
         </div>
 
         <div class="header-right">
-          <div id="header-countdown" class="countdown-chip" title="Target 2nd MB Examination Date">
-            <i data-lucide="clock"></i>
-            <span id="header-countdown-text">March 1, 2027</span>
-          </div>
-
           <button type="button" id="font-scale-btn" class="icon-btn" title="Cycle text size">
             A/a (MD)
           </button>
-
-          <button type="button" id="install-app-btn" class="icon-btn hidden" title="Add to Home Screen" aria-label="Add to Home Screen">
-            <i data-lucide="download"></i>
-            <span class="hide-on-xs">Install</span>
-          </button>
-
           <button type="button" id="theme-toggle-btn" class="icon-btn" title="Switch Light / Dark Mode" aria-label="Switch Light or Dark Mode">
-            <i data-lucide="moon"></i>
-          </button>
-
-          <button type="button" id="header-upgrade-btn" class="btn btn-primary btn-xs">
-            ₦1,000 Premium
+            🌙 Dark
           </button>
         </div>
       </header>
 
-      <!-- Global Banner / Toast Area -->
+      <!-- Global Toast Area -->
       <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
       <!-- Primary Dynamic View Container -->
@@ -135,23 +113,18 @@
     <!-- Mobile Bottom Navigation Bar -->
     <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="Mobile Navigation">
       <button type="button" class="bottom-nav-item is-active" data-nav-view="dashboard">
-        <i data-lucide="layout-dashboard"></i>
         <span>Home</span>
       </button>
       <button type="button" class="bottom-nav-item" data-nav-view="syllabus">
-        <i data-lucide="book-open"></i>
         <span>Syllabus</span>
       </button>
       <button type="button" class="bottom-nav-item" data-nav-view="timer">
-        <i data-lucide="timer"></i>
         <span>Timer</span>
       </button>
       <button type="button" class="bottom-nav-item" data-nav-view="ai-coach">
-        <i data-lucide="sparkles"></i>
         <span>AI Coach</span>
       </button>
       <button type="button" id="mobile-more-btn" class="bottom-nav-item" data-nav-view="materials">
-        <i data-lucide="layers"></i>
         <span>Materials</span>
       </button>
     </nav>
