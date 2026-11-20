@@ -52,7 +52,6 @@ function syncHeaderAndNavState() {
   const { prefs, uiCache } = snap;
   applyPreferencesToDom(prefs);
 
-  // Highlight active navigation buttons across desktop & mobile bottom nav
   document.querySelectorAll('[data-nav-view]').forEach((btn) => {
     const target = btn.getAttribute('data-nav-view');
     const isCurrent = target === activeView;
@@ -64,7 +63,11 @@ function syncHeaderAndNavState() {
     }
   });
 
-  // Update header badge & theme button if present
+  const contextTitle = document.getElementById('header-context-title');
+  if (contextTitle) {
+    contextTitle.textContent = VIEW_TITLES[activeView] || 'Dashboard';
+  }
+
   const planBadge = document.getElementById('header-plan-badge');
   if (planBadge) {
     planBadge.textContent = uiCache.isPremium ? 'Premium · Unlimited' : 'Free · ₦1,000 Once';
