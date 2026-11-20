@@ -4,14 +4,31 @@
 
 import { APP_CONFIG } from '../config/app-config.js';
 
+const DEFAULT_FOCUS_MINUTES = Number(APP_CONFIG?.timerPresets?.defaultFocusMinutes) || 25;
+const DEFAULT_BREAK_MINUTES = Number(APP_CONFIG?.timerPresets?.defaultBreakMinutes) || 5;
+const DEFAULT_EXAM_DATE =
+  typeof APP_CONFIG?.defaultExamDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(APP_CONFIG.defaultExamDate)
+    ? APP_CONFIG.defaultExamDate
+    : '2027-03-01';
+const DEFAULT_EXAM_TITLE =
+  typeof APP_CONFIG?.defaultExamTitle === 'string' && APP_CONFIG.defaultExamTitle.trim()
+    ? APP_CONFIG.defaultExamTitle.trim()
+    : '2nd MB Professional Exams';
+const STORAGE_PREFIX =
+  typeof APP_CONFIG?.localStoragePrefix === 'string' && APP_CONFIG.localStoragePrefix.trim()
+    ? APP_CONFIG.localStoragePrefix.trim()
+    : '2ndmbstudy_';
+
 const DEFAULT_PREFS = Object.freeze({
   theme: 'light',
+  fontScale: 'md',
+  accent: 'teal',
   soundEnabled: true,
-  focusMinutes: APP_CONFIG.timerPresets.defaultFocusMinutes,
-  breakMinutes: APP_CONFIG.timerPresets.defaultBreakMinutes,
+  focusMinutes: DEFAULT_FOCUS_MINUTES,
+  breakMinutes: DEFAULT_BREAK_MINUTES,
   activeView: 'dashboard',
-  examDate: APP_CONFIG.defaultExamDate,
-  examTitle: APP_CONFIG.defaultExamTitle,
+  examDate: DEFAULT_EXAM_DATE,
+  examTitle: DEFAULT_EXAM_TITLE,
   studentName: 'Student'
 });
 
@@ -23,7 +40,7 @@ const DEFAULT_UI_CACHE = Object.freeze({
 });
 
 function keyFor(name) {
-  return `${APP_CONFIG.localStoragePrefix}${name}`;
+  return `${STORAGE_PREFIX}${name}`;
 }
 
 function safeGetRaw(fullKey) {
@@ -49,6 +66,10 @@ export function loadPreferences() {
   try {
     const parsed = JSON.parse(raw);
     const theme = parsed && parsed.theme === 'dark' ? 'dark' : 'light';
+    const fontScale =
+      parsed && ['sm', 'md', 'lg'].includes(parsed.fontScale) ? parsed.fontScale : DEFAULT_PREFS.fontScale;
+    const accent =
+      parsed && ['teal', 'indigo', 'emerald'].includes(parsed.accent) ? parsed.accent : DEFAULT_PREFS.accent;
     const soundEnabled = parsed && typeof parsed.soundEnabled === 'boolean' ? parsed.soundEnabled : true;
     const focusMinutes =
       parsed && Number.isFinite(Number(parsed.focusMinutes)) && Number(parsed.focusMinutes) >= 1 && Number(parsed.focusMinutes) <= 240
@@ -77,6 +98,8 @@ export function loadPreferences() {
 
     return {
       theme,
+      fontScale,
+      accent,
       soundEnabled,
       focusMinutes,
       breakMinutes,
@@ -98,6 +121,8 @@ export function savePreferences(partialPrefs = {}) {
   };
   const normalized = {
     theme: next.theme === 'dark' ? 'dark' : 'light',
+    fontScale: ['sm', 'md', 'lg'].includes(next.fontScale) ? next.fontScale : DEFAULT_PREFS.fontScale,
+    accent: ['teal', 'indigo', 'emerald'].includes(next.accent) ? next.accent : DEFAULT_PREFS.accent,
     soundEnabled: Boolean(next.soundEnabled),
     focusMinutes: Math.min(240, Math.max(1, Number(next.focusMinutes) || DEFAULT_PREFS.focusMinutes)),
     breakMinutes: Math.min(120, Math.max(1, Number(next.breakMinutes) || DEFAULT_PREFS.breakMinutes)),
