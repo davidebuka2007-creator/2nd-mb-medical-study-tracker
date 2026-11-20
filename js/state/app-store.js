@@ -25,12 +25,41 @@ function makeId(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+const DEFAULT_PREFS = Object.freeze({
+  theme: 'light',
+  fontScale: 'md',
+  accent: 'teal',
+  examDate: '2027-03-01'
+});
+
+const DEFAULT_UI_CACHE = Object.freeze({
+  isPremium: false,
+  paymentReference: '',
+  usedAiInteractions: 0
+});
+
+function safeLoadPrefs() {
+  try {
+    return { ...DEFAULT_PREFS, ...(loadPreferences() || {}) };
+  } catch {
+    return { ...DEFAULT_PREFS };
+  }
+}
+
+function safeLoadUiCache() {
+  try {
+    return { ...DEFAULT_UI_CACHE, ...(loadUiCache() || {}) };
+  } catch {
+    return { ...DEFAULT_UI_CACHE };
+  }
+}
+
 const state = {
   initialized: false,
   loading: true,
   error: null,
-  prefs: loadPreferences(),
-  uiCache: loadUiCache(),
+  prefs: safeLoadPrefs(),
+  uiCache: safeLoadUiCache(),
   topicStatesMap: new Map(),
   customTopics: [],
   categories: [],
@@ -87,12 +116,14 @@ export function isPremiumActive() {
 
 export function getRemainingFreeAiInteractions() {
   if (isPremiumActive()) return Infinity;
+  const maxFree = Number(APP_CONFIG?.pricing?.freeMaxAiInteractions ?? 10);
   const used = Number(state.uiCache?.usedAiInteractions || 0);
-  return Math.max(0, APP_CONFIG.pricing.freeMaxAiInteractions - used);
+  return Math.max(0, maxFree - used);
 }
 
 export function computeStudyStats() {
-  const totalOfficial = OFFICIAL_TOPICS.length;
+  const topics = Array.isArray(OFFICIAL_TOPICS) ? OFFICIAL_TOPICS : [];
+  const totalOfficial = topics.length;
   let completedOfficial = 0;
   let inProgressOfficial = 0;
   let notStartedOfficial = 0;
@@ -109,7 +140,7 @@ export function computeStudyStats() {
     3: { total: 0, completed: 0, inProgress: 0, notStarted: 0 }
   };
 
-  for (const topic of OFFICIAL_TOPICS) {
+  for (const topic of topics) {
     const rec = getTopicState(topic.id);
     const status = rec.status || 'not_started';
 
@@ -137,10 +168,8 @@ export function computeStudyStats() {
   const officialPercent =
     totalOfficial > 0 ? Math.round((completedOfficial / totalOfficial) * 1000) / 10 : 0;
 
-  // Custom topics are tracked separately so they never inflate official syllabus completion %
   const customCompleted = state.customTopics.filter((c) => c.status === 'completed').length;
 
-  // Study sessions, streaks, and XP
   let totalMinutes = 0;
   const minutesByDay = new Map();
   const minutesBySubject = { Anatomy: 0, Biochemistry: 0, Physiology: 0, General: 0 };
@@ -157,7 +186,6 @@ export function computeStudyStats() {
     minutesBySubject[subjKey] += mins;
   }
 
-  // Compute current consecutive daily streak
   let streakDays = 0;
   const cursor = new Date();
   for (let i = 0; i < 365; i += 1) {
@@ -170,18 +198,18 @@ export function computeStudyStats() {
       streakDays += 1;
       cursor.setDate(cursor.getDate() - 1);
     } else if (i === 0) {
-      // Allow today to still be in progress if yesterday had study activity
       cursor.setDate(cursor.getDate() - 1);
     } else {
       break;
     }
   }
 
-  const xp = Math.floor(totalMinutes * APP_CONFIG.gamification.xpPerQualifyingMinute);
-  const level = Math.floor(xp / APP_CONFIG.gamification.xpPerLevel) + 1;
-  const xpIntoLevel = xp % APP_CONFIG.gamification.xpPerLevel;
+  const xpRate = Number(APP_CONFIG?.gamification?.xpPerQualifyingMinute ?? 1);
+  const levelStep = Number(APP_CONFIG?.gamification?.xpPerLevel ?? 100);
+  const xp = Math.floor(totalMinutes * xpRate);
+  const level = Math.floor(xp / levelStep) + 1;
+  const xpIntoLevel = xp % levelStep;
 
-  // Daily study pace calculator
   const pace = computePace(
     totalOfficial - completedOfficial,
     getTrackedOfficialTopicIds().filter((id) => getTopicState(id).status !== 'completed').length,
@@ -201,7 +229,7 @@ export function computeStudyStats() {
       completed: customCompleted
     },
     trackedCount: getTrackedOfficialTopicIds().length,
-    freeTrackerLimit: APP_CONFIG.pricing.freeMaxTrackedOfficialTopics,
+    freeTrackerLimit: Number(APP_CONFIG?.pricing?.freeMaxTrackedOfficialTopics ?? 10),
     bySubject,
     bySemester,
     totalMinutes: Math.round(totalMinutes),
@@ -212,7 +240,7 @@ export function computeStudyStats() {
     xp,
     level,
     xpIntoLevel,
-    xpPerLevel: APP_CONFIG.gamification.xpPerLevel,
+    xpPerLevel: levelStep,
     pace
   };
 }
@@ -282,22 +310,31 @@ export async function initStore() {
   notify();
 
   try {
-    const localData = await loadAllLocalStudyData();
+    const localData = await Promise.race([
+      loadAllLocalStudyData(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Storage took too long to respond.')), 8000)
+      )
+    ]);
+
     state.topicStatesMap.clear();
-    for (const item of localData.topicStates || []) {
-      state.topicStatesMap.set(item.topicId, item);
+    for (const item of localData?.topicStates || []) {
+      if (item && item.topicId) {
+        state.topicStatesMap.set(item.topicId, item);
+      }
     }
-    state.customTopics = localData.customTopics || [];
-    state.categories = localData.categories || [];
-    state.sessions = localData.sessions || [];
-    state.tasks = localData.tasks || [];
-    state.timetable = localData.timetable || [];
-    state.materials = localData.materials || [];
-    state.aiChats = localData.aiChats || [];
+    state.customTopics = Array.isArray(localData?.customTopics) ? localData.customTopics : [];
+    state.categories = Array.isArray(localData?.categories) ? localData.categories : [];
+    state.sessions = Array.isArray(localData?.sessions) ? localData.sessions : [];
+    state.tasks = Array.isArray(localData?.tasks) ? localData.tasks : [];
+    state.timetable = Array.isArray(localData?.timetable) ? localData.timetable : [];
+    state.materials = Array.isArray(localData?.materials) ? localData.materials : [];
+    state.aiChats = Array.isArray(localData?.aiChats) ? localData.aiChats : [];
     state.initialized = true;
     state.loading = false;
     notify();
   } catch (err) {
+    state.initialized = true;
     state.loading = false;
     state.error = err?.message || 'Unable to initialize local study storage.';
     notify();
@@ -305,17 +342,20 @@ export async function initStore() {
 }
 
 export function updatePreferences(partial) {
-  state.prefs = savePreferences(partial);
+  state.prefs = { ...DEFAULT_PREFS, ...savePreferences(partial) };
   notify();
   return state.prefs;
 }
 
 export function syncUiEntitlementCache({ isPremium, paymentReference, usedAiInteractions }) {
-  state.uiCache = saveUiCache({
-    ...(typeof isPremium === 'boolean' ? { isPremium } : {}),
-    ...(typeof paymentReference === 'string' ? { paymentReference } : {}),
-    ...(typeof usedAiInteractions === 'number' ? { usedAiInteractions } : {})
-  });
+  state.uiCache = {
+    ...DEFAULT_UI_CACHE,
+    ...saveUiCache({
+      ...(typeof isPremium === 'boolean' ? { isPremium } : {}),
+      ...(typeof paymentReference === 'string' ? { paymentReference } : {}),
+      ...(typeof usedAiInteractions === 'number' ? { usedAiInteractions } : {})
+    })
+  };
   notify();
   return state.uiCache;
 }
@@ -333,7 +373,6 @@ export async function setTopicStatus(topicId, nextStatus) {
     updatedAt: new Date().toISOString()
   };
 
-  // Enforce 10-topic Free tracker limit if enabling tracking on a new topic
   if (!isPremiumActive() && !prev.tracked) {
     const trackedCount = getTrackedOfficialTopicIds().length;
     if (trackedCount >= APP_CONFIG.pricing.freeMaxTrackedOfficialTopics) {
@@ -359,7 +398,6 @@ export async function setTopicStatus(topicId, nextStatus) {
 export async function toggleTopicTracked(topicId) {
   const prev = getTopicState(topicId);
   if (prev.tracked) {
-    // Untrack preserves status, notes, and history safely
     const updated = {
       ...prev,
       tracked: false,
@@ -429,14 +467,16 @@ export async function saveTopicNotes(topicId, notesText) {
   return updated;
 }
 
-// Drive open rule: Not Started -> In Progress; NEVER downgrade Completed -> In Progress
 export async function recordDriveFolderOpened(topicId) {
   const prev = getTopicState(topicId);
   const nextStatus = prev.status === 'not_started' ? 'in_progress' : prev.status;
   const updated = {
     ...prev,
     status: nextStatus,
-    tracked: prev.tracked || (isPremiumActive() || getTrackedOfficialTopicIds().length < APP_CONFIG.pricing.freeMaxTrackedOfficialTopics),
+    tracked:
+      prev.tracked ||
+      isPremiumActive() ||
+      getTrackedOfficialTopicIds().length < APP_CONFIG.pricing.freeMaxTrackedOfficialTopics,
     lastDriveOpenedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -456,7 +496,10 @@ export async function undoLastAction() {
   if (!action) return false;
   if (action.type === 'topicState') {
     const rec = action.previousRecord;
-    if (rec && (rec.tracked || rec.favourite || rec.notes || rec.status !== 'not_started' || rec.lastDriveOpenedAt)) {
+    if (
+      rec &&
+      (rec.tracked || rec.favourite || rec.notes || rec.status !== 'not_started' || rec.lastDriveOpenedAt)
+    ) {
       await putRecord('topicStates', rec);
       state.topicStatesMap.set(action.topicId, rec);
     } else {
