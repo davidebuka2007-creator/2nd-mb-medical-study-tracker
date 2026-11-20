@@ -15,6 +15,9 @@ const STORE_NAMES = Object.freeze([
   'aiChats'
 ]);
 
+const DB_NAME = String(APP_CONFIG?.dbName || '2ndmbstudy_db');
+const DB_VERSION = Number(APP_CONFIG?.dbVersion) > 0 ? Number(APP_CONFIG.dbVersion) : 1;
+
 let dbPromise = null;
 
 function openDatabase() {
@@ -22,11 +25,30 @@ function openDatabase() {
 
   dbPromise = new Promise((resolve, reject) => {
     if (typeof window === 'undefined' || !('indexedDB' in window)) {
+      dbPromise = null;
       reject(new Error('IndexedDB is not supported in this browser.'));
       return;
     }
 
-    const request = window.indexedDB.open(APP_CONFIG.dbName, APP_CONFIG.dbVersion);
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        dbPromise = null;
+        reject(new Error('Opening browser storage timed out.'));
+      }
+    }, 6000);
+
+    let request;
+    try {
+      request = window.indexedDB.open(DB_NAME, DB_VERSION);
+    } catch (err) {
+      clearTimeout(timer);
+      settled = true;
+      dbPromise = null;
+      reject(err || new Error('Unable to open IndexedDB.'));
+      return;
+    }
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
@@ -63,10 +85,35 @@ function openDatabase() {
       }
     };
 
-    request.onsuccess = () => resolve(request.result);
+    request.onblocked = () => {
+      clearTimeout(timer);
+      if (!settled) {
+        settled = true;
+        dbPromise = null;
+        reject(new Error('Storage is blocked by another open tab. Close extra tabs and retry.'));
+      }
+    };
+
+    request.onsuccess = () => {
+      clearTimeout(timer);
+      const db = request.result;
+      db.onversionchange = () => {
+        db.close();
+        dbPromise = null;
+      };
+      if (!settled) {
+        settled = true;
+        resolve(db);
+      }
+    };
+
     request.onerror = () => {
-      dbPromise = null;
-      reject(request.error || new Error('Failed to open IndexedDB.'));
+      clearTimeout(timer);
+      if (!settled) {
+        settled = true;
+        dbPromise = null;
+        reject(request.error || new Error('Failed to open IndexedDB.'));
+      }
     };
   });
 
@@ -133,7 +180,14 @@ export async function clearStore(storeName) {
 
 export async function loadAllLocalStudyData() {
   const entries = await Promise.all(
-    STORE_NAMES.map(async (name) => [name, await getAllFromStore(name)])
+    STORE_NAMES.map(async (name) => {
+      try {
+        const rows = await getAllFromStore(name);
+        return [name, Array.isArray(rows) ? rows : []];
+      } catch {
+        return [name, []];
+      }
+    })
   );
   return Object.fromEntries(entries);
 }
@@ -142,8 +196,8 @@ export async function exportStudyBackupJson() {
   const data = await loadAllLocalStudyData();
   return JSON.stringify(
     {
-      app: APP_CONFIG.brandName,
-      cohort: APP_CONFIG.cohortScope,
+      app: APP_CONFIG?.brandName || '2ndMBstudy',
+      cohort: APP_CONFIG?.cohortScope || '2nd MB',
       schemaVersion: 1,
       exportedAt: new Date().toISOString(),
       data
@@ -182,7 +236,6 @@ function validateAndSanitizeBackup(rawText) {
     throw new Error('Backup JSON is missing a valid "data" structure.');
   }
 
-  // Explicitly ignore any forbidden/privileged fields if present in an untrusted backup
   const d = parsed.data;
 
   const topicStates = sanitizeArray(d.topicStates, (item) => {
