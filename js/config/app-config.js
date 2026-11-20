@@ -40,7 +40,7 @@ export const APP_CONFIG = Object.freeze({
 
   // Paystack Public Key placeholder (replace with your real pk_test_ / pk_live_ key when ready; never put secret keys here)
   paystack: Object.freeze({
-    publicKeyPlaceholder: 'pk_test_replace_with_your_paystack_public_key',
+    publicKeyPlaceholder: 'pk_live_26c1147460c83e72174606d46a1641bbaee5f117',
     inlineScriptUrl: 'https://js.paystack.co/v1/inline.js'
   }),
 
